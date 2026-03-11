@@ -1,0 +1,27 @@
+# Build artifacts
+build/
+*.elf
+*.bin
+*.hex
+*.lst
+*.map
+
+# Object files
+*.o
+*.d
+
+# IDE files
+.vscode/
+.idea/
+*.cproject
+*.project
+*.settings/
+
+# Editor files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
