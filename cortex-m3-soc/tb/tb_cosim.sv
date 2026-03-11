@@ -55,9 +55,9 @@ module tb_cosim;
     end
     
     initial begin
-        $display("[TB] Loading firmware...");
-        $readmemh("firmware/build/cortex-m3-firmware.hex", flash_mem);
-        $display("[TB] Firmware loaded!");
+        $display("[TB] Loading firmware from firmware_pure.hex...");
+        $readmemh("../firmware/build/firmware_pure.hex", flash_mem);
+        $display("[TB] Firmware loaded! %0d words", $size(flash_mem));
     end
     
     always @(posedge clk or negedge rst_n) begin
