@@ -1,0 +1,22 @@
+# Build artifacts
+firmware/build/
+sim/*.vvp
+sim/*.vcd
+sim/*.log
+verif/sim/*.vvp
+verif/sim/*.vcd
+verif/sim/*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Backup files
+*.bak
+*.orig
