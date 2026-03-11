@@ -1,4 +1,6 @@
-# Cortex-M3 SoC - AHB 总线模块
+# Cortex-M3 SoC
+
+> 🦞 GPIO 控制器重构完成 - 2026-03-11 - AHB 总线模块
 
 **项目状态**: ✅ RTL 开发完成  
 **版本**: v1.0  
