@@ -1,17 +1,11 @@
 // ============================================================================
 // 模块名   : apb_peripherals
 // 功能描述 : APB 外设集合 - 包含 GPIO 和 UART
-// 作者     : Cortex-M3 SoC RTL Team
-// 创建日期 : 2026-03-11
-// 版本     : v1.0
 // ============================================================================
 
 module apb_peripherals (
-    // APB 时钟复位
     input  wire             PCLK,
     input  wire             PRESETn,
-    
-    // APB 接口
     input  wire             PSEL,
     input  wire             PENABLE,
     input  wire             PWRITE,
@@ -19,68 +13,38 @@ module apb_peripherals (
     input  wire [31:0]      PWDATA,
     output wire             PREADY,
     output wire [31:0]      PRDATA,
-    
-    // 中断输出汇总
     output wire [31:0]      irq,
-    
-    // GPIO 接口
     input  wire [63:0]      gpio_i,
     output wire [63:0]      gpio_o,
     output wire [63:0]      gpio_oen,
-    
-    // UART 接口
     input  wire             uart0_rx,
     output wire             uart0_tx,
     input  wire             uart1_rx,
     output wire             uart1_tx
 );
 
-    //============================================================
-    // 地址解码
-    //============================================================
-    
-    // 地址映射:
-    // GPIO:   0x5000_0000 - 0x5000_0FFF
-    // UART0:  0x5000_1000 - 0x5000_13FF
-    // UART1:  0x5000_1400 - 0x5000_17FF
-    
     wire [31:0] apb_addr_offset;
     wire        gpio_psel;
     wire        uart0_psel;
     wire        uart1_psel;
     
-    // 地址解码 (假设 PADDR 已经是相对于 0x5000_0000 的偏移)
     assign apb_addr_offset = PADDR;
-    
     assign gpio_psel   = PSEL & (apb_addr_offset[31:12] == 12'h0);
     assign uart0_psel  = PSEL & (apb_addr_offset[31:12] == 12'h1);
     assign uart1_psel  = PSEL & (apb_addr_offset[31:12] == 12'h1);
     
-    //============================================================
-    // APB 总线仲裁
-    //============================================================
-    
     wire        gpio_ready;
     wire        uart0_ready;
     wire        uart1_ready;
-    
     wire [31:0] gpio_rdata;
     wire [31:0] uart0_rdata;
     wire [31:0] uart1_rdata;
     
-    // PREADY - 任一设备就绪即可
     assign PREADY = gpio_ready | uart0_ready | uart1_ready;
-    
-    // PRDATA 多路选择器
-    assign PRDATA = gpio_psel ? gpio_rdata :
-                    uart0_psel ? uart0_rdata :
-                    uart1_rdata;
-    
-    //============================================================
-    // GPIO 控制器实例化
-    //============================================================
+    assign PRDATA = gpio_psel ? gpio_rdata : uart0_psel ? uart0_rdata : uart1_rdata;
     
     wire [63:0] gpio_irq;
+    wire [31:0] uart_irq;
     
     gpio_ctrl #(
         .PORT_COUNT   (4),
@@ -92,7 +56,7 @@ module apb_peripherals (
         .psel       (gpio_psel),
         .penable    (PENABLE),
         .pwrite     (PWRITE),
-        .paddr      (apb_addr_offset[11:0]),
+        .paddr      (apb_addr_offset),
         .pwdata     (PWDATA),
         .pready     (gpio_ready),
         .prdata     (gpio_rdata),
@@ -103,80 +67,47 @@ module apb_peripherals (
         .gpio_irq   (gpio_irq)
     );
     
-    //============================================================
-    // UART0 实例化
-    //============================================================
-    
-    wire        uart0_irq;
-    
-    uart_simple #(
-        .APB_ADDR_OFFSET(32'h1000)
-    ) u_uart0 (
+    uart_simple u_uart0 (
         .pclk       (PCLK),
         .preset_n   (PRESETn),
         .psel       (uart0_psel),
         .penable    (PENABLE),
         .pwrite     (PWRITE),
-        .paddr      (apb_addr_offset[11:0]),
+        .paddr      (apb_addr_offset),
         .pwdata     (PWDATA),
         .pready     (uart0_ready),
         .prdata     (uart0_rdata),
         .pslverr    (),
         .rx         (uart0_rx),
         .tx         (uart0_tx),
-        .irq        (uart0_irq)
+        .irq        (uart_irq[0])
     );
     
-    //============================================================
-    // UART1 实例化
-    //============================================================
-    
-    wire        uart1_irq;
-    
-    uart_simple #(
-        .APB_ADDR_OFFSET(32'h1400)
-    ) u_uart1 (
+    uart_simple u_uart1 (
         .pclk       (PCLK),
         .preset_n   (PRESETn),
         .psel       (uart1_psel),
         .penable    (PENABLE),
         .pwrite     (PWRITE),
-        .paddr      (apb_addr_offset[11:0]),
+        .paddr      (apb_addr_offset),
         .pwdata     (PWDATA),
         .pready     (uart1_ready),
         .prdata     (uart1_rdata),
         .pslverr    (),
         .rx         (uart1_rx),
         .tx         (uart1_tx),
-        .irq        (uart1_irq)
+        .irq        (uart_irq[1])
     );
-    
-    //============================================================
-    // 中断汇总
-    //============================================================
     
     assign irq[0] = |gpio_irq[15:0];
     assign irq[1] = |gpio_irq[31:16];
     assign irq[2] = |gpio_irq[47:32];
     assign irq[3] = |gpio_irq[63:48];
-    assign irq[4] = uart0_irq;
-    assign irq[5] = uart1_irq;
+    assign irq[4] = uart_irq[0];
+    assign irq[5] = uart_irq[1];
     assign irq[31:6] = 26'b0;
     
 endmodule
-
-
-// ============================================================================
-// 模块名   : uart_simple
-// 功能描述 : 简化 UART 模型 - 支持 TX 输出到 console
-// 作者     : Cortex-M3 SoC RTL Team
-// 创建日期 : 2026-03-11
-// 版本     : v1.0
-// ============================================================================
-
-module uart_simple #(
-    parameter   APB_ADDR_OFFSET = 32'h0000
-) (
     input  wire             pclk,
     input  wire             preset_n,
     input  wire             psel,
@@ -184,8 +115,8 @@ module uart_simple #(
     input  wire             pwrite,
     input  wire [31:0]      paddr,
     input  wire [31:0]      pwdata,
-    output reg              pready,
-    output reg [31:0]       prdata,
+    output wire             pready,
+    output wire [31:0]      prdata,
     output wire             pslverr,
     input  wire             rx,
     output reg              tx,
@@ -199,22 +130,30 @@ module uart_simple #(
     reg [31:0]  tx_hold_reg;
     reg [31:0]  status_reg;
     reg [31:0]  ctrl_reg;
-    
     reg         tx_busy;
     reg [3:0]   tx_bit_cnt;
     reg [7:0]   tx_shift_reg;
+    reg         apb_ready_reg;
+    reg [31:0]  prdata_reg;
+    
+    assign pready  = apb_ready_reg;
+    assign prdata  = prdata_reg;
+    assign pslverr = 1'b0;
+    assign irq     = 1'b0;
+    assign status_reg[0] = ~tx_busy;
+    assign status_reg[1] = ~tx_busy;
+    assign status_reg[5] = 1'b0;
     
     always @(posedge pclk or negedge preset_n) begin
         if (!preset_n) begin
-            pready   <= 1'b0;
-            prdata   <= 32'h0;
-            tx       <= 1'b1;
-            tx_busy  <= 1'b0;
+            apb_ready_reg <= 1'b0;
+            prdata_reg    <= 32'h0;
+            tx            <= 1'b1;
+            tx_busy       <= 1'b0;
         end else if (psel && !penable) begin
-            pready <= 1'b0;
-        end else if (penable && !pready) begin
-            pready <= 1'b1;
-            
+            apb_ready_reg <= 1'b0;
+        end else if (penable && !apb_ready_reg) begin
+            apb_ready_reg <= 1'b1;
             if (pwrite) begin
                 if (paddr == UART_TX_HOLD) begin
                     tx_hold_reg <= pwdata;
