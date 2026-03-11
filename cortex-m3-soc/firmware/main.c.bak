@@ -1,0 +1,182 @@
+/**
+ * @file main.c
+ * @brief Main program entry point
+ * @details Example application demonstrating firmware capabilities
+ */
+
+#include <stdint.h>
+#include "drivers/gpio.h"
+#include "drivers/uart.h"
+#include "drivers/timer.h"
+#include "drivers/sram.h"
+
+/* Function prototypes */
+void test_blinky(void);
+void test_uart_echo(void);
+void test_memory(void);
+void test_benchmark(void);
+
+/**
+ * @brief Main entry point
+ */
+int main(void)
+{
+    /* Initialize UART for printf */
+    uart_init(UART0, 115200);
+
+    printf("\n");
+    printf("========================================\n");
+    printf("  Cortex-M3 SoC Firmware v1.0\n");
+    printf("========================================\n");
+    printf("\n");
+
+    /* System information */
+    printf("System initialized at 200MHz\n");
+    printf("SRAM: 128KB @ 0x20000000\n");
+    printf("Flash: 512KB @ 0x00000000\n");
+    printf("\n");
+
+    /* Run tests based on configuration */
+    #ifdef TEST_BLINKY
+    printf("Running BLINKY test...\n");
+    test_blinky();
+    #endif
+
+    #ifdef TEST_UART_ECHO
+    printf("Running UART ECHO test...\n");
+    test_uart_echo();
+    #endif
+
+    #ifdef TEST_MEMORY
+    printf("Running MEMORY test...\n");
+    test_memory();
+    #endif
+
+    #ifdef TEST_BENCHMARK
+    printf("Running BENCHMARK test...\n");
+    test_benchmark();
+    #endif
+
+    /* Default: run all tests */
+    #if !defined(TEST_BLINKY) && !defined(TEST_UART_ECHO) && \
+        !defined(TEST_MEMORY) && !defined(TEST_BENCHMARK)
+    
+    printf("Running all tests...\n\n");
+
+    /* Memory test */
+    test_memory();
+
+    /* Benchmark */
+    test_benchmark();
+
+    printf("\nAll tests completed!\n");
+    #endif
+
+    /* Main loop */
+    while (1) {
+        /* Idle */
+        __WFI();
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Blinky test - Toggle GPIO pin
+ */
+void test_blinky(void)
+{
+    gpio_init(GPIOA);
+    gpio_set_mode(GPIOA, GPIO_PIN_5, GPIO_MODE_OUTPUT);
+
+    printf("Blinky test: Toggle PA5\n");
+
+    for (int i = 0; i < 10; i++) {
+        gpio_toggle(GPIOA, GPIO_PIN_5);
+        for (volatile int j = 0; j < 100000; j++);
+        gpio_toggle(GPIOA, GPIO_PIN_5);
+        for (volatile int j = 0; j < 100000; j++);
+    }
+
+    printf("Blinky test completed\n");
+}
+
+/**
+ * @brief UART echo test
+ */
+void test_uart_echo(void)
+{
+    printf("UART Echo test: Type characters to echo\n");
+    printf("(Send 'q' to quit)\n");
+
+    while (1) {
+        if (uart_rx_ready(UART0)) {
+            char c = uart_rx(UART0);
+            uart_tx(UART0, c);
+            if (c == 'q') {
+                printf("\nUART Echo test completed\n");
+                break;
+            }
+        }
+    }
+}
+
+/**
+ * @brief Memory test
+ */
+void test_memory(void)
+{
+    sram_result_t result;
+
+    printf("Testing SRAM @ 0x20000000 (128KB)...\n");
+    result = sram_test((uint32_t *)0x20000000, 0x20000);
+    
+    if (result.passed) {
+        printf("  SRAM test PASSED\n");
+        printf("  Patterns tested: 0x00000000, 0xFFFFFFFF, 0xAAAAAAAA, 0x55555555\n");
+    } else {
+        printf("  SRAM test FAILED at address 0x%08X\n", result.error_addr);
+        printf("  Expected: 0x%08X, Got: 0x%08X\n", result.expected, result.actual);
+    }
+
+    printf("\n");
+}
+
+/**
+ * @brief Performance benchmark
+ */
+void test_benchmark(void)
+{
+    volatile uint32_t start, end;
+    volatile uint32_t cycles;
+    uint32_t result;
+
+    printf("Performance Benchmark @ 200MHz:\n");
+
+    /* Simple loop benchmark */
+    start = timer_read(Timer0);
+    for (volatile int i = 0; i < 1000000; i++) {
+        result += i;
+    }
+    end = timer_read(Timer0);
+    cycles = end - start;
+
+    printf("  1M iterations: %u cycles (%.2f cycles/iter)\n", 
+           cycles, (float)cycles / 1000000.0f);
+
+    /* Memory bandwidth test */
+    uint32_t *src = (uint32_t *)0x20000000;
+    uint32_t *dst = (uint32_t *)0x20004000;
+    
+    start = timer_read(Timer0);
+    for (int i = 0; i < 4096; i++) {
+        dst[i] = src[i];
+    }
+    end = timer_read(Timer0);
+    cycles = end - start;
+
+    printf("  16KB copy: %u cycles (%.2f MB/s)\n",
+           cycles, (16384.0f * 200.0f) / (cycles * 4.0f));
+
+    printf("\n");
+}

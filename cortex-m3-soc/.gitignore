@@ -1,0 +1,24 @@
+# Build artifacts
+firmware/build/
+firmware/*.o
+firmware/*.elf
+firmware/*.bin
+firmware/*.hex
+firmware/*.map
+
+# Simulation
+sim/*.vvp
+sim/*.vcd
+tb/*.vcd
+verif/sim/*.vvp
+verif/sim/*.vcd
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
