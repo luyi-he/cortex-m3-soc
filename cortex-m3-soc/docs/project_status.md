@@ -1,8 +1,9 @@
 # Cortex-M3 SoC 项目状态
 
-**更新时间**: 2026-03-11 12:00  
-**项目阶段**: 🔄 GPIO 控制器完成 + 单元测试通过  
-**代码仓库**: https://github.com/luyi-he/cortex-m3-soc
+**更新时间**: 2026-03-11 16:55  
+**项目阶段**: ✅ GPIO 控制器完成 + 单元测试 6/6 通过  
+**代码仓库**: https://github.com/luyi-he/cortex-m3-soc  
+**PR**: #2 (IRQ 修复)
 
 ---
 

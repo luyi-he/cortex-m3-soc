@@ -29,7 +29,7 @@ module gpio_ctrl #(
     input  wire [15:0]      gpio_i,         // GPIO 输入
     output reg  [15:0]      gpio_o,         // GPIO 输出
     output reg  [15:0]      gpio_oen,       // GPIO 输出使能
-    output wire [15:0]      gpio_irq        // GPIO 中断
+    output reg  [15:0]      gpio_irq        // GPIO 中断
 );
 
     //============================================================
@@ -55,18 +55,16 @@ module gpio_ctrl #(
     //============================================================
     
     reg [15:0]  gpio_i_prev;
-    wire [15:0] gpio_i_edge;
-    
-    assign gpio_irq = gpio_i_edge;
     
     always @(posedge pclk or negedge preset_n) begin
-        if (!preset_n)
+        if (!preset_n) begin
             gpio_i_prev <= 16'h0000;
-        else
+            gpio_irq <= 16'h0000;
+        end else begin
             gpio_i_prev <= gpio_i;
+            gpio_irq <= gpio_i ^ gpio_i_prev;  // 边沿检测
+        end
     end
-    
-    assign gpio_i_edge = gpio_i ^ gpio_i_prev;
     
     //============================================================
     // APB 状态机

@@ -201,13 +201,20 @@ module tb_gpio_ctrl;
         begin
             $display("[TEST] IRQ Generation");
             
+            // 先等待几个周期，确保模块稳定
+            repeat (5) @(posedge pclk);
+            
             gpio_i = 16'h0000;
-            @(posedge pclk);
+            repeat (2) @(posedge pclk);
+            
+            // 在同一个时钟周期改变 gpio_i 并采样 gpio_irq
             gpio_i = 16'hFFFF;
             @(posedge pclk);
+            // 此时 gpio_irq 应该是 gpio_i ^ gpio_i_prev = 0xFFFF ^ 0x0000 = 0xFFFF
             
             if (gpio_irq !== 16'hFFFF) begin
-                $display("  ✗ IRQ generation failed");
+                $display("  ✗ IRQ generation failed, got 0x%04h (expected 0xFFFF)", gpio_irq);
+                $display("  Note: IRQ is a single-cycle pulse!");
                 tests_failed = tests_failed + 1;
             end else begin
                 $display("  ✓ IRQ generation passed");
