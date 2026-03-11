@@ -1,9 +1,9 @@
 # Cortex-M3 SoC 项目状态
 
-**更新时间**: 2026-03-11 16:55  
-**项目阶段**: ✅ GPIO 控制器完成 + 单元测试 6/6 通过  
+**更新时间**: 2026-03-11 18:56  
+**项目阶段**: ✅ 全芯片仿真跑通 + GPIO 单元测试 6/6 通过  
 **代码仓库**: https://github.com/luyi-he/cortex-m3-soc  
-**PR**: #2 (IRQ 修复)
+**PR**: #2 (已 merged)
 
 ---
 
@@ -28,7 +28,7 @@
 - ✅ 实现 10 个寄存器 (MODER, OTYPER, OSPEEDR, PUPDR, IDR, ODR, BSRR, LCKR, AFRL, AFRH)
 - ✅ BSRR 原子操作
 - ✅ GPIO 输入变化检测 IRQ
-- ✅ 单元测试 5/6 通过
+- ✅ 单元测试 6/6 通过
 - ✅ 添加 UART 简化模型
 
 **测试结果**:
@@ -38,13 +38,32 @@ GPIO Controller Test
   ✓ ODR write
   ✓ BSRR reset/set
   ✓ IDR read
-  ✗ IRQ (时序小问题)
-Passed: 5/6
+  ✓ IRQ generation
+Passed: 6/6 (100%)
+```
+
+---
+
+### 🔬 全芯片仿真 (2026-03-11 ✅)
+
+**状态**: 仿真跑通，生成 148MB 波形文件
+
+**完成内容**:
+- ✅ 修复顶层模块端口匹配
+- ✅ 运行全芯片仿真
+- ✅ 生成 VCD 波形文件 (`sim/waveform.vcd`)
+
+**测试结果**:
+```
+Cortex-M3 SoC Simulation
+✓ Compilation successful!
+✓ Simulation completed!
+Waveform: waveform.vcd (148MB)
 ```
 
 **Known Issues**:
-- 全芯片仿真顶层端口不匹配（待修复）
-- GPIO IRQ 测试时序需调整
+- CPU 行为模型 PC 一直为 0x（需完善）
+- 固件协同仿真待验证
 
 ---
 
