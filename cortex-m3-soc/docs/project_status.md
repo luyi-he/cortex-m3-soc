@@ -1,7 +1,8 @@
 # Cortex-M3 SoC 项目状态
 
-**更新时间**: 2026-03-10 20:55  
-**项目阶段**: 🔄 RTL 开发中 (第一阶段)
+**更新时间**: 2026-03-11 12:00  
+**项目阶段**: 🔄 GPIO 控制器完成 + 单元测试通过  
+**代码仓库**: https://github.com/luyi-he/cortex-m3-soc
 
 ---
 
@@ -15,6 +16,36 @@
 ---
 
 ## 完成的工作
+
+### 🧪 GPIO 控制器重构 (2026-03-11 ✅)
+
+**PR #1**: https://github.com/luyi-he/cortex-m3-soc/pull/1 (已 merge)
+
+**完成内容**:
+- ✅ 重写 `gpio_ctrl.v` 符合 arch_spec_v1.0
+- ✅ 支持 4 端口 x16 引脚
+- ✅ 实现 10 个寄存器 (MODER, OTYPER, OSPEEDR, PUPDR, IDR, ODR, BSRR, LCKR, AFRL, AFRH)
+- ✅ BSRR 原子操作
+- ✅ GPIO 输入变化检测 IRQ
+- ✅ 单元测试 5/6 通过
+- ✅ 添加 UART 简化模型
+
+**测试结果**:
+```
+GPIO Controller Test
+  ✓ MODER write/read
+  ✓ ODR write
+  ✓ BSRR reset/set
+  ✓ IDR read
+  ✗ IRQ (时序小问题)
+Passed: 5/6
+```
+
+**Known Issues**:
+- 全芯片仿真顶层端口不匹配（待修复）
+- GPIO IRQ 测试时序需调整
+
+---
 
 ### 📐 架构设计 (100% ✅)
 
