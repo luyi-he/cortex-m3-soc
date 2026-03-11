@@ -26,8 +26,11 @@ module cortex_m3 #(
     reg [2:0]  cpu_state;
     reg [15:0] gpio_out;
     
+    // 固件大小检测 (481 字 = 1924 字节)
+    localparam FIRMWARE_END = 32'h00000784;
+    
     localparam STATE_RESET=3'h0, STATE_FETCHSP=3'h1, STATE_FETCHPC=3'h2,
-               STATE_FETCH=3'h3, STATE_EXECUTE=3'h4;
+               STATE_FETCH=3'h3, STATE_EXECUTE=3'h4, STATE_HALT=3'h5;
     
     initial begin
         gpio_out = 16'h0;
@@ -261,6 +264,19 @@ module cortex_m3 #(
                         pc <= pc + 32'h4;
                     end
                     
+                    // 检查是否读取到无效指令 (0x00000000 或 0xffffffff)
+                    if ((instruction == 32'h00000000 || instruction == 32'hffffffff) && exec_cnt > 10 && cpu_state != STATE_HALT) begin
+                        $display("[CPU] *** Reached empty Flash ***");
+                        $display("[CPU] *** Halting CPU ***");
+                        $display("[CPU] ========================================");
+                        $display("[CPU] Execution Summary:");
+                        $display("[CPU]   Instructions Executed: %0d", exec_cnt);
+                        $display("[CPU]   Cycles: %0d", cycle_cnt);
+                        $display("[CPU]   Final PC: 0x%08h", pc);
+                        $display("[CPU] ========================================");
+                        cpu_state <= STATE_HALT;
+                    end
+                    
                     // GPIO 访问检测
                     if ((HADDR >= 32'h50000000) && (HADDR < 32'h50001000) && HWRITE) begin
                         $display("[CPU] *** GPIO Access at 0x%08h ***", HADDR);
@@ -277,6 +293,10 @@ module cortex_m3 #(
                         HTRANS <= 2'b10;
                     end
                     cpu_state <= STATE_FETCH;
+                end
+                STATE_HALT: begin
+                    HTRANS <= 2'b00;  // IDLE
+                    $display("[CPU] Halted at cycle %0d", cycle_cnt);
                 end
                 default: cpu_state <= STATE_RESET;
             endcase

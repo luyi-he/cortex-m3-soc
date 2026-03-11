@@ -64,7 +64,10 @@ module tb_cosim;
         if (!rst_n) begin
             flash_data <= 32'h0;
         end else if (hready && htrans == 2'b10) begin
-            flash_data <= flash_mem[haddr[19:2]];
+            if (haddr[19:2] < 481)  // 固件大小
+                flash_data <= flash_mem[haddr[19:2]];
+            else
+                flash_data <= 32'h0;  // 空 Flash 返回 0
         end
     end
     
