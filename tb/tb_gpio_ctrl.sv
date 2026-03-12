@@ -201,18 +201,26 @@ module tb_gpio_ctrl;
         begin
             $display("[TEST] IRQ Generation");
             
+            // 稳定状态
             gpio_i = 16'h0000;
             @(posedge pclk);
-            gpio_i = 16'hFFFF;
             @(posedge pclk);
             
+            // 输入变化 - 在 clock edge 之前变化，检测 edge 信号
+            #1;
+            gpio_i = 16'hFFFF;
+            #1;  // 等待组合逻辑传播
+            
             if (gpio_irq !== 16'hFFFF) begin
-                $display("  ✗ IRQ generation failed");
+                $display("  ✗ IRQ generation failed (expected 0xFFFF, got 0x%04h)", gpio_irq);
                 tests_failed = tests_failed + 1;
             end else begin
                 $display("  ✓ IRQ generation passed");
                 tests_passed = tests_passed + 1;
             end
+            
+            // 等待下一个 clock，确认 edge 被捕获并更新 prev
+            @(posedge pclk);
         end
     endtask
     
