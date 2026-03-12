@@ -1,0 +1,397 @@
+{
+  "creator": "Yosys 0.63 (git sha1 70a11c6bf0e8dd669f56c7da3587f78b405138e2, clang++ 17.0.0 -fPIC -O3)",
+  "modules": {
+    "clk_gen": {
+      "attributes": {
+        "top": "00000000000000000000000000000001",
+        "src": "../rtl/base/clk_gen.v:10.1-74.10"
+      },
+      "parameter_default_values": {
+        "CLKIN_FREQ": "00000000000000000000000000011001",
+        "CLKOUT1_FREQ": "00000000000000000000000011001000",
+        "CLKOUT2_FREQ": "00000000000000000000000001100100"
+      },
+      "ports": {
+        "osc_clk": {
+          "direction": "input",
+          "bits": [ 2 ]
+        },
+        "rst_n": {
+          "direction": "input",
+          "bits": [ 3 ]
+        },
+        "hclk": {
+          "direction": "output",
+          "bits": [ 4 ]
+        },
+        "pclk": {
+          "direction": "output",
+          "bits": [ 5 ]
+        },
+        "hreset_n": {
+          "direction": "output",
+          "bits": [ 6 ]
+        },
+        "preset_n": {
+          "direction": "output",
+          "bits": [ 7 ]
+        },
+        "clk_locked": {
+          "direction": "output",
+          "bits": [ 8 ]
+        },
+        "rst_active": {
+          "direction": "output",
+          "bits": [ 9 ]
+        }
+      },
+      "cells": {
+        "$auto$ff.cc:337:slice$43": {
+          "hide_name": 1,
+          "type": "$adffe",
+          "parameters": {
+            "ARST_POLARITY": "00000000000000000000000000000000",
+            "ARST_VALUE": "0",
+            "CLK_POLARITY": "00000000000000000000000000000001",
+            "EN_POLARITY": "00000000000000000000000000000000",
+            "WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:33.5-43.8"
+          },
+          "port_directions": {
+            "ARST": "input",
+            "CLK": "input",
+            "D": "input",
+            "EN": "input",
+            "Q": "output"
+          },
+          "connections": {
+            "ARST": [ 3 ],
+            "CLK": [ 2 ],
+            "D": [ 10 ],
+            "EN": [ 4 ],
+            "Q": [ 5 ]
+          }
+        },
+        "$eq$../rtl/base/clk_gen.v:40$4": {
+          "hide_name": 1,
+          "type": "$not",
+          "parameters": {
+            "A_SIGNED": "00000000000000000000000000000000",
+            "A_WIDTH": "00000000000000000000000000000001",
+            "Y_WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:40.26-40.42"
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 4 ],
+            "Y": [ 11 ]
+          }
+        },
+        "$logic_not$../rtl/base/clk_gen.v:72$14": {
+          "hide_name": 1,
+          "type": "$logic_not",
+          "parameters": {
+            "A_SIGNED": "00000000000000000000000000000000",
+            "A_WIDTH": "00000000000000000000000000000001",
+            "Y_WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:72.25-72.41"
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 6 ],
+            "Y": [ 9 ]
+          }
+        },
+        "$not$../rtl/base/clk_gen.v:40$5": {
+          "hide_name": 1,
+          "type": "$not",
+          "parameters": {
+            "A_SIGNED": "00000000000000000000000000000000",
+            "A_WIDTH": "00000000000000000000000000000001",
+            "Y_WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:40.46-40.55"
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 5 ],
+            "Y": [ 10 ]
+          }
+        },
+        "$procdff$22": {
+          "hide_name": 1,
+          "type": "$adff",
+          "parameters": {
+            "ARST_POLARITY": "00000000000000000000000000000000",
+            "ARST_VALUE": "00",
+            "CLK_POLARITY": "1",
+            "WIDTH": "00000000000000000000000000000010"
+          },
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:64.5-69.8"
+          },
+          "port_directions": {
+            "ARST": "input",
+            "CLK": "input",
+            "D": "input",
+            "Q": "output"
+          },
+          "connections": {
+            "ARST": [ 3 ],
+            "CLK": [ 5 ],
+            "D": [ 6, 12 ],
+            "Q": [ 12, 7 ]
+          }
+        },
+        "$procdff$27": {
+          "hide_name": 1,
+          "type": "$adff",
+          "parameters": {
+            "ARST_POLARITY": "00000000000000000000000000000000",
+            "ARST_VALUE": "0000",
+            "CLK_POLARITY": "1",
+            "WIDTH": "00000000000000000000000000000100"
+          },
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:52.5-59.8"
+          },
+          "port_directions": {
+            "ARST": "input",
+            "CLK": "input",
+            "D": "input",
+            "Q": "output"
+          },
+          "connections": {
+            "ARST": [ 3 ],
+            "CLK": [ 4 ],
+            "D": [ 13, 14, 15, 16 ],
+            "Q": [ 17, 18, 19, 20 ]
+          }
+        },
+        "$procdff$32": {
+          "hide_name": 1,
+          "type": "$adff",
+          "parameters": {
+            "ARST_POLARITY": "00000000000000000000000000000000",
+            "ARST_VALUE": "0",
+            "CLK_POLARITY": "1",
+            "WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:33.5-43.8"
+          },
+          "port_directions": {
+            "ARST": "input",
+            "CLK": "input",
+            "D": "input",
+            "Q": "output"
+          },
+          "connections": {
+            "ARST": [ 3 ],
+            "CLK": [ 2 ],
+            "D": [ 11 ],
+            "Q": [ 4 ]
+          }
+        },
+        "$procdff$42": {
+          "hide_name": 1,
+          "type": "$adff",
+          "parameters": {
+            "ARST_POLARITY": "00000000000000000000000000000000",
+            "ARST_VALUE": "0",
+            "CLK_POLARITY": "1",
+            "WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:33.5-43.8"
+          },
+          "port_directions": {
+            "ARST": "input",
+            "CLK": "input",
+            "D": "input",
+            "Q": "output"
+          },
+          "connections": {
+            "ARST": [ 3 ],
+            "CLK": [ 2 ],
+            "D": [ "1" ],
+            "Q": [ 8 ]
+          }
+        },
+        "$procmux$16": {
+          "hide_name": 1,
+          "type": "$mux",
+          "parameters": {
+            "WIDTH": "00000000000000000000000000000100"
+          },
+          "attributes": {
+            "full_case": "00000000000000000000000000000001",
+            "src": "../rtl/base/clk_gen.v:55.18-55.33|../rtl/base/clk_gen.v:55.14-58.55"
+          },
+          "port_directions": {
+            "A": "input",
+            "B": "input",
+            "S": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ "0", "0", "0", "0" ],
+            "B": [ "1", 17, 18, 19 ],
+            "S": [ 8 ],
+            "Y": [ 13, 14, 15, 16 ]
+          }
+        },
+        "$reduce_and$../rtl/base/clk_gen.v:72$13": {
+          "hide_name": 1,
+          "type": "$reduce_and",
+          "parameters": {
+            "A_SIGNED": "00000000000000000000000000000000",
+            "A_WIDTH": "00000000000000000000000000000100",
+            "Y_WIDTH": "00000000000000000000000000000001"
+          },
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:72.27-72.40"
+          },
+          "port_directions": {
+            "A": "input",
+            "Y": "output"
+          },
+          "connections": {
+            "A": [ 17, 18, 19, 20 ],
+            "Y": [ 6 ]
+          }
+        }
+      },
+      "netnames": {
+        "$0\\hclk_reg[0:0]": {
+          "hide_name": 1,
+          "bits": [ 11 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:33.5-43.8"
+          }
+        },
+        "$0\\rst_sync_reg[3:0]": {
+          "hide_name": 1,
+          "bits": [ 13, 14, 15, 16 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:52.5-59.8"
+          }
+        },
+        "$not$../rtl/base/clk_gen.v:40$5_Y": {
+          "hide_name": 1,
+          "bits": [ 10 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:40.46-40.55"
+          }
+        },
+        "clk_locked": {
+          "hide_name": 0,
+          "bits": [ 8 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:21.29-21.39"
+          }
+        },
+        "hclk": {
+          "hide_name": 0,
+          "bits": [ 4 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:17.29-17.33"
+          }
+        },
+        "hclk_reg": {
+          "hide_name": 0,
+          "bits": [ 4 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:25.17-25.25"
+          }
+        },
+        "hreset_n": {
+          "hide_name": 0,
+          "bits": [ 6 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:19.29-19.37"
+          }
+        },
+        "osc_clk": {
+          "hide_name": 0,
+          "bits": [ 2 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:15.29-15.36"
+          }
+        },
+        "pclk": {
+          "hide_name": 0,
+          "bits": [ 5 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:18.29-18.33"
+          }
+        },
+        "pclk_reg": {
+          "hide_name": 0,
+          "bits": [ 5 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:26.17-26.25"
+          }
+        },
+        "pll_locked_reg": {
+          "hide_name": 0,
+          "bits": [ 8 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:27.17-27.31"
+          }
+        },
+        "preset_n": {
+          "hide_name": 0,
+          "bits": [ 7 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:20.29-20.37"
+          }
+        },
+        "preset_sync": {
+          "hide_name": 0,
+          "bits": [ 12, 7 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:63.15-63.26"
+          }
+        },
+        "rst_active": {
+          "hide_name": 0,
+          "bits": [ 9 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:22.29-22.39"
+          }
+        },
+        "rst_n": {
+          "hide_name": 0,
+          "bits": [ 3 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:16.29-16.34"
+          }
+        },
+        "rst_sync_reg": {
+          "hide_name": 0,
+          "bits": [ 17, 18, 19, 20 ],
+          "attributes": {
+            "src": "../rtl/base/clk_gen.v:50.15-50.27"
+          }
+        }
+      }
+    }
+  }
+}
