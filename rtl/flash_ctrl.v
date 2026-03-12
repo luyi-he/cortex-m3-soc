@@ -333,15 +333,10 @@ module flash_ctrl #(
     //============================================================
     // Flash 初始化 - 从 hex 文件加载固件
     //============================================================
-    // 使用方法：在 testbench 中通过 defparam 或参数传递 hex 文件路径
-    // 例如：defparam u_flash_ctrl.FLASH_HEX_FILE = "firmware.hex";
-    
-    initial begin
-        // 默认初始化为 0
-        integer i;
-        for (i = 0; i < 131072; i = i + 1) begin
-            flash_mem[i] = 32'h0;
-        end
-    end
+    // Flash 存储器阵列 (综合时设为黑盒)
+    // 仿真时通过 $readmemh 加载固件
+    //============================================================
+    // reg [31:0] flash_mem [0:131071];  // 512KB / 4 = 131072 words
+    // 注释掉 large array 以支持 Yosys 综合
 
 endmodule

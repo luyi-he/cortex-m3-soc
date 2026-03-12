@@ -152,16 +152,24 @@ module gpio_ctrl #(
         if (!preset_n) begin
             gpio_oen <= 16'hFFFF;  // 默认输入
         end else if (pwrite && (paddr[7:2] == 6'h00)) begin
-            // MODER 更新时重新计算输出使能
-            integer j;
-            for (j = 0; j < 16; j = j + 1) begin
-                case (pwdata[j*2 +: 2])
-                    2'b00: gpio_oen[j] <= 1'b1;  // 输入
-                    2'b01: gpio_oen[j] <= 1'b0;  // 输出
-                    2'b10: gpio_oen[j] <= 1'b0;  // 复用
-                    2'b11: gpio_oen[j] <= 1'b1;  // 模拟
-                endcase
-            end
+            // MODER 更新时重新计算输出使能 (综合友好版本)
+            // 模式 00=输入，01=输出，10=复用，11=模拟
+            gpio_oen[0]  <= (pwdata[1:0]  == 2'b00 || pwdata[1:0]  == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[1]  <= (pwdata[3:2]  == 2'b00 || pwdata[3:2]  == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[2]  <= (pwdata[5:4]  == 2'b00 || pwdata[5:4]  == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[3]  <= (pwdata[7:6]  == 2'b00 || pwdata[7:6]  == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[4]  <= (pwdata[9:8]  == 2'b00 || pwdata[9:8]  == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[5]  <= (pwdata[11:10] == 2'b00 || pwdata[11:10] == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[6]  <= (pwdata[13:12] == 2'b00 || pwdata[13:12] == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[7]  <= (pwdata[15:14] == 2'b00 || pwdata[15:14] == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[8]  <= (pwdata[17:16] == 2'b00 || pwdata[17:16] == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[9]  <= (pwdata[19:18] == 2'b00 || pwdata[19:18] == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[10] <= (pwdata[21:20] == 2'b00 || pwdata[21:20] == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[11] <= (pwdata[23:22] == 2'b00 || pwdata[23:22] == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[12] <= (pwdata[25:24] == 2'b00 || pwdata[25:24] == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[13] <= (pwdata[27:26] == 2'b00 || pwdata[27:26] == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[14] <= (pwdata[29:28] == 2'b00 || pwdata[29:28] == 2'b11) ? 1'b1 : 1'b0;
+            gpio_oen[15] <= (pwdata[31:30] == 2'b00 || pwdata[31:30] == 2'b11) ? 1'b1 : 1'b0;
         end
     end
 

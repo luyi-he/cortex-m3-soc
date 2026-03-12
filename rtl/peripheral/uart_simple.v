@@ -99,8 +99,7 @@ module uart_simple #(
                 tx_shift_reg <= {1'b0, tx_shift_reg[7:1]};
             end else if (tx_bit_cnt == 4'd1) begin
                 tx <= 1'b1;  // Stop bit
-                $write("%c", dr_reg);
-                $fflush;
+                // Simulation debug removed for synthesis
             end else begin
                 tx_busy <= 1'b0;
                 sr_reg <= sr_reg | {SR_TXE, SR_TC};
