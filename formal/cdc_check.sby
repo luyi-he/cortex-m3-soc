@@ -1,0 +1,81 @@
+# ============================================================================
+# SymbiYosys 配置文件：时钟生成模块 CDC 验证
+# ============================================================================
+
+[tasks]
+# BMC (有界模型检查) - 检查 20 个周期内的属性
+cdc_check_bmc
+
+# 归纳证明 - 尝试数学证明属性永远成立
+cdc_check_proof
+
+# ============================================================================
+# 任务：cdc_check_bmc
+# ============================================================================
+
+[cdc_check_bmc]
+mode bmc
+depth 20
+engine smtbmc yosys-smtbmc
+
+# 源文件
+read -vhdl-2008
+../rtl/base/clk_gen.v
+
+# 添加 SVA 断言
+read -sv formal/sva/clk_gen_sva.sv
+
+# 顶层模块
+prep -top clk_gen -noblackbox
+
+# 假设输入信号
+assume
+    always @(posedge osc_clk) !rst_n |=> $stable(rst_n);
+    always @(*) $stable(osc_clk);
+end
+
+# 验证属性
+assert
+    always @(*) 1;  # 占位符，实际断言在 SVA 文件中
+end
+
+# 覆盖检查
+cover
+    c_hclk_rising;
+    c_pclk_rising;
+    c_reset_released;
+end
+
+# ============================================================================
+# 任务：cdc_check_proof
+# ============================================================================
+
+[cdc_check_proof]
+mode prove
+engine smtbmc yosys-smtbmc -s z3
+
+# 源文件
+read -vhdl-2008
+../rtl/base/clk_gen.v
+
+# 添加 SVA 断言
+read -sv formal/sva/clk_gen_sva.sv
+
+# 顶层模块
+prep -top clk_gen -noblackbox
+
+# 假设输入信号
+assume
+    always @(posedge osc_clk) !rst_n |=> $stable(rst_n);
+    always @(*) $stable(osc_clk);
+end
+
+# 验证属性
+assert
+    a_hclk_frequency;
+    a_pclk_frequency;
+    a_clocks_synchronous;
+    a_hreset_sync;
+    a_preset_sync;
+    a_reset_order;
+end

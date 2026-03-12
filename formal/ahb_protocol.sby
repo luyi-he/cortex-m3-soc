@@ -1,0 +1,63 @@
+# ============================================================================
+# SymbiYosys 配置文件：AHB-Lite 协议验证
+# ============================================================================
+
+[tasks]
+# BMC 检查协议合规性
+ahb_protocol_bmc
+
+# ============================================================================
+# 任务：ahb_protocol_bmc
+# ============================================================================
+
+[ahb_protocol_bmc]
+mode bmc
+depth 50
+engine smtbmc yosys-smtbmc
+
+# 源文件
+read -vhdl-2008
+../rtl/ahb_matrix.v
+
+# 添加 SVA 断言
+read -sv formal/sva/ahb_protocol_sva.sv
+
+# 顶层模块 (使用 ahb_matrix 作为 DUT)
+prep -top ahb_matrix -noblackbox
+
+# 假设输入信号
+assume
+    always @(*) $stable(hclk);
+    always @(*) hreset_n |=> $stable(hreset_n);
+    
+    # HTRANS 状态机假设
+    always @(posedge hclk) disable iff (!hreset_n)
+        htrans inside {2'b00, 2'b01, 2'b10, 2'b11};
+    
+    # HSIZE 假设 (只支持 BYTE, HALFWORD, WORD)
+    always @(posedge hclk) disable iff (!hreset_n)
+        hsize inside {3'd0, 3'd1, 3'd2};
+end
+
+# 验证属性
+assert
+    a_ready_on_reset;
+    a_idle_next;
+    a_busy_next;
+    a_nonseq_next;
+    a_seq_next;
+    a_ready_stretch;
+    a_resp_stable;
+    a_resp_okay_default;
+end
+
+# 覆盖检查
+cover
+    c_idle;
+    c_busy;
+    c_nonseq;
+    c_seq;
+    c_write;
+    c_read;
+    c_ready_stretch;
+end

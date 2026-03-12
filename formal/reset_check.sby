@@ -1,0 +1,78 @@
+# ============================================================================
+# SymbiYosys 配置文件：复位生成模块验证
+# ============================================================================
+
+[tasks]
+# BMC 检查复位同步释放
+reset_check_bmc
+
+# 归纳证明
+reset_check_proof
+
+# ============================================================================
+# 任务：reset_check_bmc
+# ============================================================================
+
+[reset_check_bmc]
+mode bmc
+depth 30
+engine smtbmc yosys-smtbmc
+
+# 源文件
+read -vhdl-2008
+../rtl/base/rst_gen.v
+
+# 添加 SVA 断言
+read -sv formal/sva/rst_gen_sva.sv
+
+# 顶层模块
+prep -top rst_gen -noblackbox
+
+# 假设输入信号
+assume
+    always @(*) $stable(hclk);
+    always @(*) $stable(pclk);
+    always @(*) rst_n |=> $stable(rst_n);
+end
+
+# 覆盖检查
+cover
+    c_reset_asserted;
+    c_reset_released;
+    c_cross_domain;
+end
+
+# ============================================================================
+# 任务：reset_check_proof
+# ============================================================================
+
+[reset_check_proof]
+mode prove
+engine smtbmc yosys-smtbmc -s z3
+
+# 源文件
+read -vhdl-2008
+../rtl/base/rst_gen.v
+
+# 添加 SVA 断言
+read -sv formal/sva/rst_gen_sva.sv
+
+# 顶层模块
+prep -top rst_gen -noblackbox
+
+# 假设输入信号
+assume
+    always @(*) $stable(hclk);
+    always @(*) $stable(pclk);
+    always @(*) rst_n |=> $stable(rst_n);
+end
+
+# 验证属性
+assert
+    a_rst_async_assert;
+    a_hreset_sync_release;
+    a_preset_sync_release;
+    a_reset_coherence;
+    a_hreset_min_pulse;
+    a_preset_min_pulse;
+end
