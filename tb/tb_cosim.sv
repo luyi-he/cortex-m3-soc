@@ -77,10 +77,12 @@ module tb_cosim;
         $finish;
     end
     
+    wire [31:0] flash_data_io;
+    
     cortex_m3_soc u_soc (
         .clk        (clk),
         .rst_n      (rst_n),
-        .osc_clk    (osc_clk),
+        .osc_clk    (1'b1),
         .gpio_i     (gpio_i),
         .gpio_o     (gpio_o),
         .gpio_oen   (gpio_oen),
@@ -88,8 +90,8 @@ module tb_cosim;
         .uart0_tx   (uart0_tx),
         .uart1_rx   (1'b1),
         .uart1_tx   (uart1_tx),
-        .flash_addr (),
-        .flash_data (32'h0),
+        .flash_addr_o (),
+        .flash_data_io (flash_data_io),
         .flash_ce_n (),
         .flash_oe_n (),
         .tck        (1'b0),

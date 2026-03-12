@@ -30,8 +30,8 @@ module cortex_m3_soc (
     output wire        uart1_tx,
     
     // Flash 接口
-    output wire [31:0] flash_addr,
-    input  wire [31:0] flash_data,
+    output wire [19:0] flash_addr_o,
+    inout  wire [31:0] flash_data_io,
     output wire        flash_ce_n,
     output wire        flash_oe_n
 );
@@ -48,13 +48,45 @@ module cortex_m3_soc (
     wire        hmastlock;
     wire [3:0]  hprot;
     wire [2:0]  hsize;
-    wire        htrans;
+    wire [1:0]  htrans;
     wire        hwrite;
+    wire [31:0] hwdata;
+    wire [31:0] hrdata;
     wire        hready;
     wire        hresp;
-    wire [31:0] hrdata;
-    wire [31:0] hwdata;
-    wire        hsel;
+    
+    // AHB 从机信号 - Flash
+    wire        flash_hsel;
+    wire [31:0] flash_haddr;
+    wire        flash_hwrite;
+    wire [1:0]  flash_htrans;
+    wire [2:0]  flash_hsize;
+    wire [31:0] flash_hwdata;
+    wire [31:0] flash_hrdata;
+    wire        flash_hready;
+    wire        flash_hresp;
+    
+    // AHB 从机信号 - SRAM
+    wire        sram_hsel;
+    wire [31:0] sram_haddr;
+    wire        sram_hwrite;
+    wire [1:0]  sram_htrans;
+    wire [2:0]  sram_hsize;
+    wire [31:0] sram_hwdata;
+    wire [31:0] sram_hrdata;
+    wire        sram_hready;
+    wire        sram_hresp;
+    
+    // AHB 从机信号 - AHB2APB Bridge
+    wire        bridge_hsel;
+    wire [31:0] bridge_haddr;
+    wire        bridge_hwrite;
+    wire [1:0]  bridge_htrans;
+    wire [2:0]  bridge_hsize;
+    wire [31:0] bridge_hwdata;
+    wire [31:0] bridge_hrdata;
+    wire        bridge_hready;
+    wire        bridge_hresp;
     
     // APB 信号
     wire        pclk;
@@ -125,54 +157,60 @@ module cortex_m3_soc (
     //============================================================
     
     ahb_matrix u_ahb_matrix (
-        .HCLK       (hclk),
-        .HRESETn    (hreset_n),
+        // AHB 时钟复位
+        .hclk       (hclk),
+        .hreset_n   (hreset_n),
         
-        // 主机端口 (CPU)
-        .m0_HADDR   (haddr),
-        .m0_HBURST  (hburst),
-        .m0_HMASTLOCK(hmastlock),
-        .m0_HPROT   (hprot),
-        .m0_HSIZE   (hsize),
-        .m0_HTRANS  (htrans),
-        .m0_HWRITE  (hwrite),
-        .m0_HWDATA  (hwdata),
-        .m0_HREADY  (hready),
-        .m0_HRESP   (hresp),
-        .m0_HRDATA  (hrdata),
+        // AHB 主机接口 (CPU)
+        .haddr_m    (haddr),
+        .hburst_m   (hburst),
+        .hprot_m    (hprot),
+        .hsize_m    (hsize),
+        .htrans_m   (htrans),
+        .hwrite_m   (hwrite),
+        .hwdata_m   (hwdata),
+        .hrdata_m   (hrdata),
+        .hready_m   (hready),
+        .hresp_m    (hresp),
         
-        // 从机端口 0 - Flash
-        .s0_HSEL    (flash_hsel),
-        .s0_HADDR   (flash_haddr),
-        .s0_HWRITE  (flash_hwrite),
-        .s0_HTRANS  (flash_htrans),
-        .s0_HSIZE   (flash_hsize),
-        .s0_HWDATA  (flash_hwdata),
-        .s0_HREADY  (flash_hready),
-        .s0_HRESP   (flash_hresp),
-        .s0_HRDATA  (flash_hrdata),
+        // AHB 从机接口 0 - Flash
+        .haddr_s0   (flash_haddr),
+        .hburst_s0  (hburst),
+        .hprot_s0   (hprot),
+        .hsize_s0   (hsize),
+        .htrans_s0  (htrans),
+        .hwrite_s0  (flash_hwrite),
+        .hwdata_s0  (flash_hwdata),
+        .hrdata_s0  (flash_hrdata),
+        .hready_s0  (flash_hready),
+        .hresp_s0   (flash_hresp),
+        .hsel_s0    (flash_hsel),
         
-        // 从机端口 1 - SRAM
-        .s1_HSEL    (sram_hsel),
-        .s1_HADDR   (sram_haddr),
-        .s1_HWRITE  (sram_hwrite),
-        .s1_HTRANS  (sram_htrans),
-        .s1_HSIZE   (sram_hsize),
-        .s1_HWDATA  (sram_hwdata),
-        .s1_HREADY  (sram_hready),
-        .s1_HRESP   (sram_hresp),
-        .s1_HRDATA  (sram_hrdata),
+        // AHB 从机接口 1 - SRAM
+        .haddr_s1   (sram_haddr),
+        .hburst_s1  (hburst),
+        .hprot_s1   (hprot),
+        .hsize_s1   (hsize),
+        .htrans_s1  (htrans),
+        .hwrite_s1  (sram_hwrite),
+        .hwdata_s1  (sram_hwdata),
+        .hrdata_s1  (sram_hrdata),
+        .hready_s1  (sram_hready),
+        .hresp_s1   (sram_hresp),
+        .hsel_s1    (sram_hsel),
         
-        // 从机端口 2 - AHB2APB Bridge
-        .s2_HSEL    (bridge_hsel),
-        .s2_HADDR   (bridge_haddr),
-        .s2_HWRITE  (bridge_hwrite),
-        .s2_HTRANS  (bridge_htrans),
-        .s2_HSIZE   (bridge_hsize),
-        .s2_HWDATA  (bridge_hwdata),
-        .s2_HREADY  (bridge_hready),
-        .s2_HRESP   (bridge_hresp),
-        .s2_HRDATA  (bridge_hrdata)
+        // AHB 从机接口 2 - AHB2APB Bridge
+        .haddr_s2   (bridge_haddr),
+        .hburst_s2  (hburst),
+        .hprot_s2   (hprot),
+        .hsize_s2   (hsize),
+        .htrans_s2  (htrans),
+        .hwrite_s2  (bridge_hwrite),
+        .hwdata_s2  (bridge_hwdata),
+        .hrdata_s2  (bridge_hrdata),
+        .hready_s2  (bridge_hready),
+        .hresp_s2   (bridge_hresp),
+        .hsel_s2    (bridge_hsel)
     );
     
     //============================================================
@@ -180,25 +218,27 @@ module cortex_m3_soc (
     //============================================================
     
     flash_ctrl u_flash_ctrl (
-        .HCLK       (hclk),
-        .HRESETn    (hreset_n),
+        .hclk       (hclk),
+        .hreset_n   (hreset_n),
         
         // AHB 接口
-        .HSEL       (flash_hsel),
-        .HADDR      (flash_haddr),
-        .HWRITE     (flash_hwrite),
-        .HTRANS     (flash_htrans),
-        .HSIZE      (flash_hsize),
-        .HWDATA     (flash_hwdata),
-        .HREADY     (flash_hready),
-        .HRESP      (flash_hresp),
-        .HRDATA     (flash_hrdata),
+        .haddr      (flash_haddr),
+        .hburst     (hburst),
+        .hprot      (hprot),
+        .hsize      (hsize),
+        .htrans     (htrans),
+        .hwrite     (flash_hwrite),
+        .hwdata     (flash_hwdata),
+        .hrdata     (flash_hrdata),
+        .hready     (flash_hready),
+        .hresp      (flash_hresp),
+        .hsel       (flash_hsel),
         
         // 外部 Flash 接口
-        .flash_addr (flash_addr),
-        .flash_data (flash_data),
-        .flash_ce_n (flash_ce_n),
-        .flash_oe_n (flash_oe_n)
+        .flash_addr_o   (flash_addr_o),
+        .flash_data_io  (flash_data_io),
+        .flash_ce_n     (flash_ce_n),
+        .flash_oe_n     (flash_oe_n)
     );
     
     //============================================================
@@ -206,19 +246,21 @@ module cortex_m3_soc (
     //============================================================
     
     sram_ctrl u_sram_ctrl (
-        .HCLK       (hclk),
-        .HRESETn    (hreset_n),
+        .hclk       (hclk),
+        .hreset_n   (hreset_n),
         
         // AHB 接口
-        .HSEL       (sram_hsel),
-        .HADDR      (sram_haddr),
-        .HWRITE     (sram_hwrite),
-        .HTRANS     (sram_htrans),
-        .HSIZE      (sram_hsize),
-        .HWDATA     (sram_hwdata),
-        .HREADY     (sram_hready),
-        .HRESP      (sram_hresp),
-        .HRDATA     (sram_hrdata)
+        .haddr      (sram_haddr),
+        .hburst     (hburst),
+        .hprot      (hprot),
+        .hsize      (hsize),
+        .htrans     (htrans),
+        .hwrite     (sram_hwrite),
+        .hwdata     (sram_hwdata),
+        .hrdata     (sram_hrdata),
+        .hready     (sram_hready),
+        .hresp      (sram_hresp),
+        .hsel       (sram_hsel)
     );
     
     //============================================================
@@ -226,31 +268,31 @@ module cortex_m3_soc (
     //============================================================
     
     ahb2apb_bridge u_ahb2apb (
-        .HCLK       (hclk),
-        .HRESETn    (hreset_n),
-        .PCLK       (pclk),
-        .PRESETn    (preset_n),
+        .hclk       (hclk),
+        .hreset_n   (hreset_n),
         
         // AHB 接口
-        .HSEL       (bridge_hsel),
-        .HADDR      (bridge_haddr),
-        .HWRITE     (bridge_hwrite),
-        .HTRANS     (bridge_htrans),
-        .HSIZE      (bridge_hsize),
-        .HWDATA     (bridge_hwdata),
-        .HREADY     (bridge_hready),
-        .HRESP      (bridge_hresp),
-        .HRDATA     (bridge_hrdata),
+        .haddr      (bridge_haddr),
+        .hburst     (hburst),
+        .hprot      (hprot),
+        .hsize      (hsize),
+        .htrans     (htrans),
+        .hwrite     (bridge_hwrite),
+        .hwdata     (bridge_hwdata),
+        .hrdata     (bridge_hrdata),
+        .hready     (bridge_hready),
+        .hresp      (bridge_hresp),
+        .hsel       (bridge_hsel),
         
         // APB 接口
-        .PSEL       (psel),
-        .PENABLE    (penable),
-        .PWRITE     (pwrite),
-        .PADDR      (paddr),
-        .PWDATA     (pwdata),
-        .PREADY     (pready),
-        .PRDATA     (prdata),
-        .PSLVERR    (pslverr)
+        .paddr      (paddr),
+        .psel       (psel),
+        .penable    (penable),
+        .pwrite     (pwrite),
+        .pwdata     (pwdata),
+        .prdata     (prdata),
+        .pready     (pready),
+        .pslverr    (pslverr)
     );
     
     //============================================================
