@@ -25,43 +25,43 @@ module gpio_ctrl #(
     output reg [31:0]       prdata,
     output reg              pslverr,
     
-    // GPIO 外部接口
-    input  wire [15:0]      gpio_i,         // GPIO 输入
-    output reg  [15:0]      gpio_o,         // GPIO 输出
-    output reg  [15:0]      gpio_oen,       // GPIO 输出使能
-    output wire [15:0]      gpio_irq        // GPIO 中断
+    // GPIO 外部接口 - 4 端口 x16 引脚 = 64 位
+    input  wire [63:0]      gpio_i,         // GPIO 输入
+    output reg  [63:0]      gpio_o,         // GPIO 输出
+    output reg  [63:0]      gpio_oen,       // GPIO 输出使能
+    output wire [63:0]      gpio_irq        // GPIO 中断
 );
 
     //============================================================
     // 寄存器定义 (arch_spec_v1.0.md Section 3.1)
     //============================================================
     
-    reg [31:0]  moder_reg;      // 0x00 模式寄存器
-    reg [31:0]  otyper_reg;     // 0x04 输出类型
-    reg [31:0]  ospeedr_reg;    // 0x08 输出速度
-    reg [31:0]  pupdr_reg;      // 0x0C 上下拉
-    wire [31:0] idr_wire;       // 0x10 输入数据 (组合逻辑)
-    reg [31:0]  odr_reg;        // 0x14 输出数据
-    reg [31:0]  bsrr_reg;       // 0x18 置位/复位 (写触发)
-    reg [31:0]  lckr_reg;       // 0x1C 锁定寄存器
-    reg [31:0]  afrl_reg;       // 0x20 复用功能低
-    reg [31:0]  afrh_reg;       // 0x24 复用功能高
+    reg [63:0]  moder_reg;      // 0x00 模式寄存器
+    reg [63:0]  otyper_reg;     // 0x04 输出类型
+    reg [63:0]  ospeedr_reg;    // 0x08 输出速度
+    reg [63:0]  pupdr_reg;      // 0x0C 上下拉
+    wire [63:0] idr_wire;       // 0x10 输入数据 (组合逻辑)
+    reg [63:0]  odr_reg;        // 0x14 输出数据
+    reg [63:0]  bsrr_reg;       // 0x18 置位/复位 (写触发)
+    reg [63:0]  lckr_reg;       // 0x1C 锁定寄存器
+    reg [63:0]  afrl_reg;       // 0x20 复用功能低
+    reg [63:0]  afrh_reg;       // 0x24 复用功能高
     
     // 输入数据直接映射到 IDR
-    assign idr_wire = {16'h0000, gpio_i};
+    assign idr_wire = gpio_i;
     
     //============================================================
     // 中断生成 (输入变化检测)
     //============================================================
     
-    reg [15:0]  gpio_i_prev;
-    wire [15:0] gpio_i_edge;
+    reg [63:0]  gpio_i_prev;
+    wire [63:0] gpio_i_edge;
     
     assign gpio_irq = gpio_i_edge;
     
     always @(posedge pclk or negedge preset_n) begin
         if (!preset_n)
-            gpio_i_prev <= 16'h0000;
+            gpio_i_prev <= 64'h0000_0000_0000_0000;
         else
             gpio_i_prev <= gpio_i;
     end

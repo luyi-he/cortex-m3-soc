@@ -47,8 +47,8 @@ module apb_peripherals (
     wire [31:0] uart_irq;
     
     gpio_ctrl #(
-        .PORT_COUNT   (4),
-        .PIN_COUNT    (16),
+        .PORT_ID      (0),
+        .PIN_COUNT    (64),
         .APB_ADDR_BASE(32'h0000)
     ) u_gpio_ctrl (
         .pclk       (PCLK),
@@ -108,6 +108,13 @@ module apb_peripherals (
     assign irq[31:6] = 26'b0;
     
 endmodule
+
+// ============================================================================
+// 模块名   : uart_tx
+// 功能描述 : UART 发送模块
+// ============================================================================
+
+module uart_tx (
     input  wire             pclk,
     input  wire             preset_n,
     input  wire             psel,
